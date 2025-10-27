@@ -7,6 +7,8 @@ from plotly.subplots import make_subplots
 import sys
 import os
 import io
+import time
+import shutil
 from PIL import Image
 import requests
 from pathlib import Path
@@ -17,8 +19,10 @@ sys.path.append(str(Path(__file__).parent.parent / "re-laiss" / "src"))
 import relaiss as rl
 from relaiss.constants import lc_features_const, host_features_const, anom_lc_features_const
 from relaiss.search import primer
-from relaiss.fetch import fetch_ps1_rgb_jpeg, fetch_ps1_cutout
+from relaiss.fetch import fetch_ps1_rgb_jpeg, fetch_ps1_cutout, get_TNS_data
+from relaiss.utils import get_cache_dir
 import antares_client
+from antares_client._api.models import Locus
 from astropy.visualization import AsinhStretch, PercentileInterval
 
 # Page configuration
@@ -141,10 +145,6 @@ def initialize_relaiss():
         with st.spinner(status_msg):
             # Clear only index cache if we need to rebuild (preserve preprocessed dataset bank)
             if need_rebuild:
-                from relaiss.utils import get_cache_dir
-                import shutil
-                from pathlib import Path
-
                 cache_dir = Path(get_cache_dir())
                 index_dir = cache_dir / 'indices'
 
@@ -182,7 +182,6 @@ def initialize_relaiss():
 
 def search_similar_transients(ztf_id, n_matches, lc_features, host_features):
     """Search for similar transients using reLAISS."""
-    import time
     try:
         # Use the existing client (should be initialized by now)
         client = st.session_state.relaiss_client
@@ -334,9 +333,6 @@ def main():
             st.warning("No index built")
 
         if st.button("Clear Cache", help="Clear all cached data to fix index corruption issues"):
-            from relaiss.utils import get_cache_dir
-            import shutil
-
             cache_dir = get_cache_dir()
             if cache_dir.exists():
                 try:
@@ -505,10 +501,6 @@ def main():
 
             # Fetch query object metadata
             try:
-                from antares_client._api.models import Locus
-                from relaiss.fetch import get_TNS_data
-                import antares_client
-
                 query_locus = antares_client.search.get_by_ztf_object_id(ztf_object_id=query_ztf_id)
                 query_iau, query_spec, query_z = get_TNS_data(query_ztf_id)
             except Exception as e:
@@ -539,7 +531,7 @@ def main():
                     </div>
                     <div>
                         <div style="font-size: 0.65rem; color: #a0aec0; margin-bottom: 0.15rem;">Redshift</div>
-                        <div style="font-weight: 500; font-size: 0.85rem;">{query_z if isinstance(query_z, str) else f'{query_z:.4f}' if query_z != 'N/A' else 'N/A'}</div>
+                        <div style="font-weight: 500; font-size: 0.85rem;">{'N/A' if query_z is None or query_z == 'N/A' else (query_z if isinstance(query_z, str) else f'{query_z:.4f}')}</div>
                     </div>
                 </div>
                 <div style="margin-top: 0.375rem;">
@@ -558,6 +550,14 @@ def main():
                 iau_name = results['iau_name'].iloc[i] if 'iau_name' in results.columns else 'N/A'
                 spec = results['spec_cls'].iloc[i] if 'spec_cls' in results.columns else 'N/A'
                 z = results['z'].iloc[i] if 'z' in results.columns else 'N/A'
+
+                # Handle NaN values
+                if pd.isna(z):
+                    z = 'N/A'
+                if pd.isna(iau_name):
+                    iau_name = 'N/A'
+                if pd.isna(spec):
+                    spec = 'N/A'
 
                 # Create a styled card for each match
                 st.markdown(f"""
@@ -584,7 +584,7 @@ def main():
                         </div>
                         <div>
                             <div style="font-size: 0.65rem; color: #a0aec0; margin-bottom: 0.15rem;">Redshift</div>
-                            <div style="font-weight: 500; font-size: 0.85rem;">{z if isinstance(z, str) else f'{z:.4f}' if z != 'N/A' else 'N/A'}</div>
+                            <div style="font-weight: 500; font-size: 0.85rem;">{'N/A' if z is None or z == 'N/A' else (z if isinstance(z, str) else f'{z:.4f}')}</div>
                         </div>
                     </div>
                     <div style="margin-top: 0.375rem;">
@@ -603,8 +603,6 @@ def main():
             # Get primer data for the query object
             if st.session_state.relaiss_client:
                 try:
-                    import antares_client
-
                     primer_dict = primer(
                         lc_ztf_id=ztf_id,
                         dataset_bank_path=st.session_state.relaiss_client.bank_csv,
@@ -758,7 +756,6 @@ def main():
                                         stretch = AsinhStretch() + PercentileInterval(99.5)
                                         img_stretched = stretch(img_array)
                                         # Convert to PIL Image for display
-                                        from PIL import Image
                                         img_pil = Image.fromarray((img_stretched * 255).astype(np.uint8))
                                         st.image(img_pil, use_container_width=True)
                                     except Exception:
@@ -768,7 +765,6 @@ def main():
                                             stretch = AsinhStretch() + PercentileInterval(99.5)
                                             img_stretched = stretch(img_array)
                                             # Convert to PIL Image for display
-                                            from PIL import Image
                                             img_pil = Image.fromarray((img_stretched * 255).astype(np.uint8))
                                             st.image(img_pil, use_container_width=True)
                                         except Exception as e:
