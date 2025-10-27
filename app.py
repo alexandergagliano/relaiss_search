@@ -760,7 +760,7 @@ def main():
                                         # Convert to PIL Image for display
                                         from PIL import Image
                                         img_pil = Image.fromarray((img_stretched * 255).astype(np.uint8))
-                                        st.image(img_pil, use_column_width=True)
+                                        st.image(img_pil, use_container_width=True)
                                     except Exception:
                                         try:
                                             img_array = fetch_ps1_cutout(host['HOST_RA'], host['HOST_DEC'], size_pix=128)
@@ -770,7 +770,7 @@ def main():
                                             # Convert to PIL Image for display
                                             from PIL import Image
                                             img_pil = Image.fromarray((img_stretched * 255).astype(np.uint8))
-                                            st.image(img_pil, use_column_width=True)
+                                            st.image(img_pil, use_container_width=True)
                                         except Exception as e:
                                             st.error(f"Failed to fetch image: {e}")
                                     
