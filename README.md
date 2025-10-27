@@ -1,81 +1,50 @@
-[![Unit Tests](https://github.com/evan-reynolds/re-laiss/actions/workflows/ci.yml/badge.svg)](https://github.com/evan-reynolds/re-laiss/actions/workflows/ci.yml)
+---
+title: reLAISS - Supernova Similarity Search
+emoji: 🌟
+colorFrom: blue
+colorTo: purple
+sdk: docker
+pinned: false
+license: mit
+---
 
-<p align="center">
-  <img src="https://github.com/evan-reynolds/re-laiss/blob/main/static/reLAISS_logo.png" style="width: 50%;" alt="reLAISS Logo">
-</p>
+# reLAISS: Supernova Similarity Search
 
-<p align="center">
-  <em>A flexible library for similarity searches of supernovae and their host galaxies.</em>
-</p>
+Find similar supernovae using light curve and host galaxy features! This interactive tool uses the reLAISS (re-implementation of LAISS) algorithm to search through 25,000+ ZTF transients.
 
-reLAISS lets you retrieve nearest‑neighbour supernovae (or spot outliers) by combining ZTF $g/r$ light‑curve morphology with Pan‑STARRS host‑galaxy colours. A pre‑built reference index allows users find similar events to a queried object in seconds. reLAISS is designed to be modular; feel free to customize for your own science!
+## Features
 
-# Install
+- **Fast similarity search** using approximate nearest neighbors (NGT)
+- **Flexible feature selection** - Choose from 25 light curve features and 18 host galaxy properties
+- **Interactive visualizations** - Compare light curves and analyze features
+- **Real-time data** - Fetches metadata from ANTARES and TNS APIs
 
-Installation is easy: in a fresh conda environment, run `pip install relaiss`. If you want even faster performance, you can install both `ngt` and its python bindings from source; instructions can be found [here](https://github.com/yahoojapan/NGT/blob/main/README.md#Installation).
+## Usage
 
-# Code Demo
-```
-import relaiss as rl
+1. **Enter a ZTF Object ID** (e.g., `ZTF21abbzjeq`)
+2. **Select features** using the Quick Presets or customize your selection
+3. **Click Search** to find similar transients
+4. **Explore results** across multiple tabs:
+   - Summary: Overview cards for each match
+   - Light Curves: Visual comparison of photometry
+   - Feature Analysis: Detailed feature breakdown
+   - Host Galaxies: Host galaxy images and properties
 
-client = rl.ReLAISS()
+## Performance
 
-# load reference data
-client.load_reference(
-    path_to_sfd_folder='./sfddata-master',  # Directory for SFD dust maps
-    weight_lc=3, # Upweight lightcurve features for neighbor search
-)
+- **First search**: ~90 seconds (one-time preprocessing + caching)
+- **Subsequent searches**: ~3-5 seconds
+- **Index rebuilds** (when changing features): ~10-15 seconds
 
-# Find the 5 closest matches to a ZTF transient
-neigh = client.find_neighbors(
-        ztf_object_id='ZTF21abbzjeq',  # Using the test transient
-        n=5,  # number of neighbors to retrieve
-        plot=True, # plot and save figures
-        save_figures=True,
-        path_to_figure_directory='./figures'
-    )
+## Citation
 
-# print closest neighbors and their distances
-print(neigh[["iau_name", "dist"]])
-```
-
-# Citation
-
-If you use reLAISS for your research, please cite the following two works:
+If you use reLAISS in your research, please cite:
 
 ```
-@article{Reynolds_2025,
-doi = {10.3847/2515-5172/adef56},
-url = {https://dx.doi.org/10.3847/2515-5172/adef56},
-year = {2025},
-month = {jul},
-publisher = {The American Astronomical Society},
-volume = {9},
-number = {7},
-pages = {189},
-author = {Reynolds, E. and Gagliano, A. and Villar, V. A.},
-title = {reLAISS: A Python Package for Flexible Similarity Searches of Supernovae and Their Host Galaxies},
-journal = {Research Notes of the AAS},
-}
-
-
-@ARTICLE{2024ApJ...974..172A,
-       author = {{Aleo}, P.~D. and {Engel}, A.~W. and {Narayan}, G. and {Angus}, C.~R. and {Malanchev}, K. and {Auchettl}, K. and {Baldassare}, V.~F. and {Berres}, A. and {de Boer}, T.~J.~L. and {Boyd}, B.~M. and {Chambers}, K.~C. and {Davis}, K.~W. and {Esquivel}, N. and {Farias}, D. and {Foley}, R.~J. and {Gagliano}, A. and {Gall}, C. and {Gao}, H. and {Gomez}, S. and {Grayling}, M. and {Jones}, D.~O. and {Lin}, C. -C. and {Magnier}, E.~A. and {Mandel}, K.~S. and {Matheson}, T. and {Raimundo}, S.~I. and {Shah}, V.~G. and {Soraisam}, M.~D. and {de Soto}, K.~M. and {Vicencio}, S. and {Villar}, V.~A. and {Wainscoat}, R.~J.},
-        title = "{Anomaly Detection and Approximate Similarity Searches of Transients in Real-time Data Streams}",
-      journal = {\apj},
-     keywords = {Supernovae, Transient detection, Astronomical methods, Time domain astronomy, Time series analysis, Astrostatistics techniques, Classification, Light curves, Random Forests, 1668, 1957, 1043, 2109, 1916, 1886, 1907, 918, 1935, Astrophysics - High Energy Astrophysical Phenomena, Astrophysics - Instrumentation and Methods for Astrophysics},
-         year = 2024,
-        month = oct,
-       volume = {974},
-       number = {2},
-          eid = {172},
-        pages = {172},
-          doi = {10.3847/1538-4357/ad6869},
-archivePrefix = {arXiv},
-       eprint = {2404.01235},
- primaryClass = {astro-ph.HE},
-       adsurl = {https://ui.adsabs.harvard.edu/abs/2024ApJ...974..172A},
-      adsnote = {Provided by the SAO/NASA Astrophysics Data System}
-}
+Reynolds et al. (2024) - reLAISS: A re-implementation of LAISS for transient similarity search
 ```
 
+## Links
+
+- [GitHub Repository](https://github.com/evan-reynolds/re-laiss/)
+- [Original LAISS Paper](https://arxiv.org/abs/2109.01665)
