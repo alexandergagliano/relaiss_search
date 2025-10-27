@@ -22,7 +22,6 @@ from relaiss.search import primer
 from relaiss.fetch import fetch_ps1_rgb_jpeg, fetch_ps1_cutout, get_TNS_data
 from relaiss.utils import get_cache_dir
 import antares_client
-from antares_client._api.models import Locus
 from astropy.visualization import AsinhStretch, PercentileInterval
 
 # Page configuration
