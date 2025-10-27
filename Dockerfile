@@ -15,6 +15,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application files
 COPY . .
 
+# Install the relaiss package
+RUN pip install --no-cache-dir .
+
 # Expose Streamlit port
 EXPOSE 7860
 
