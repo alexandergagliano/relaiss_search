@@ -393,8 +393,7 @@ def main():
             "Select light curve features",
             options=available_lc_features,
             default=st.session_state.selected_lc_features,
-            help="Choose which light curve features to include in the similarity search",
-            key="lc_features_select"
+            help="Choose which light curve features to include in the similarity search"
         )
         st.session_state.selected_lc_features = selected_lc_features
     
@@ -413,8 +412,7 @@ def main():
             "Select host galaxy features",
             options=available_host_features,
             default=st.session_state.selected_host_features,
-            help="Choose which host galaxy features to include in the similarity search",
-            key="host_features_select"
+            help="Choose which host galaxy features to include in the similarity search"
         )
         st.session_state.selected_host_features = selected_host_features
     
