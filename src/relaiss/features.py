@@ -160,31 +160,51 @@ def build_dataset_bank(
         mjd_col = None
 
     if building_entire_df_bank:
+        import time
         X_input = sanitize_features(raw_df_bank[raw_feats_no_ztf])
+
+        knn_fit_start = time.time()
         feat_imputer = KNNImputer(weights="distance").fit(X_input)
+        knn_fit_end = time.time()
+        print(f"[TIMER] features.build_dataset_bank.knn_fit: {knn_fit_end - knn_fit_start:.3f} seconds", flush=True)
+
         # Only impute if there are actually NaN values
         if X_input.isna().any().any():
+            knn_transform_start = time.time()
             imputed_filt_arr = feat_imputer.transform(X_input)
+            knn_transform_end = time.time()
+            print(f"[TIMER] features.build_dataset_bank.knn_transform: {knn_transform_end - knn_transform_start:.3f} seconds", flush=True)
         else:
             imputed_filt_arr = X_input.values
     else:
+        import time
+        read_csv_start = time.time()
         true_raw_df_bank = pd.read_csv(path_to_dataset_bank, low_memory=False)
+        read_csv_end = time.time()
+        print(f"[TIMER] features.build_dataset_bank.read_csv: {read_csv_end - read_csv_start:.3f} seconds", flush=True)
+
         X_input = sanitize_features(true_raw_df_bank[raw_feats_no_ztf])
 
+        knn_fit_start = time.time()
         if building_for_AD:
-            feat_imputer = SimpleImputer(strategy="mean").fit(X_input)
+            feat_imputer = KNNImputer(weights="distance").fit(X_input)
         else:
             feat_imputer = KNNImputer(weights="distance").fit(X_input)
+        knn_fit_end = time.time()
+        print(f"[TIMER] features.build_dataset_bank.knn_fit: {knn_fit_end - knn_fit_start:.3f} seconds", flush=True)
 
         X_transform = sanitize_features(wip_dataset_bank[raw_feats_no_ztf])
-        
+
         # FIXED: Only impute NaN values, preserve valid values
         original_values = X_transform.copy()
         nan_mask = X_transform.isna()
-        
+
         if nan_mask.any().any():
             # Only transform if there are NaN values to impute
+            knn_transform_start = time.time()
             imputed_filt_arr = feat_imputer.transform(X_transform)
+            knn_transform_end = time.time()
+            print(f"[TIMER] features.build_dataset_bank.knn_transform: {knn_transform_end - knn_transform_start:.3f} seconds", flush=True)
             # Restore original non-NaN values
             imputed_filt_arr = np.where(nan_mask.values, imputed_filt_arr, original_values.values)
         else:
@@ -196,9 +216,24 @@ def build_dataset_bank(
 
     wip_dataset_bank[raw_feats_no_ztf] = imputed_filt_df
 
-    wip_dataset_bank = wip_dataset_bank.replace([np.inf, -np.inf, -999], np.nan).dropna(
-        subset=raw_features
-    )
+    # After imputation, replace infinite values with NaN
+    wip_dataset_bank = wip_dataset_bank.replace([np.inf, -np.inf, -999], np.nan)
+    
+    # Check which features still have NaN values after imputation
+    remaining_nan_features = wip_dataset_bank[raw_feats_no_ztf].isna().any()
+    if remaining_nan_features.any():
+        print(f"WARNING: The following features still have NaN values after imputation: {remaining_nan_features[remaining_nan_features].index.tolist()}")
+        print("These features will be excluded from the search index.")
+        # Remove features that couldn't be imputed
+        features_to_keep = remaining_nan_features[~remaining_nan_features].index.tolist()
+        if len(features_to_keep) > 0:
+            wip_dataset_bank = wip_dataset_bank.dropna(subset=features_to_keep)
+        else:
+            print("ERROR: No features could be imputed. This should not happen.")
+            wip_dataset_bank = wip_dataset_bank.dropna(subset=raw_feats_no_ztf)
+    else:
+        # No remaining NaN values, keep all data
+        pass
 
     if mjd_col is not None:
         wip_dataset_bank = wip_dataset_bank.assign(
@@ -213,22 +248,34 @@ def build_dataset_bank(
 
     # Engineer the remaining features
     if not theorized:
+        import time
         if not building_for_AD:
             print("Engineering remaining features...")
         # Correct host magnitude features for dust
+        sfd_start = time.time()
         m = sfdmap.SFDMap(path_to_sfd_folder)
+        sfd_end = time.time()
+        print(f"[TIMER] features.build_dataset_bank.sfd_load: {sfd_end - sfd_start:.3f} seconds", flush=True)
 
         MW_RV = 3.1
         ext = G23(Rv=MW_RV)
+
+        ebv_start = time.time()
         MW_EBV = m.ebv(wip_dataset_bank["ra"].to_numpy(), wip_dataset_bank["dec"].to_numpy())
+        ebv_end = time.time()
+        print(f"[TIMER] features.build_dataset_bank.ebv_calculation: {ebv_end - ebv_start:.3f} seconds", flush=True)
+
         AV = MW_RV * MW_EBV
 
+        dust_correct_start = time.time()
         for band in ["g", "r", "i", "z"]:
             mags = wip_dataset_bank[f"{band}KronMag"].to_numpy()
             A_filter = -2.5 * np.log10(
                 ext.extinguish(central_wv[band]*u.AA, Av=AV)
             )
             wip_dataset_bank[f"{band}KronMagCorrected"] = mags - A_filter
+        dust_correct_end = time.time()
+        print(f"[TIMER] features.build_dataset_bank.dust_correction: {dust_correct_end - dust_correct_start:.3f} seconds", flush=True)
 
         # Create color features
         wip_dataset_bank["gminusrKronMag"] = (
@@ -258,7 +305,11 @@ def build_dataset_bank(
     if not building_for_AD:
         print("Caching preprocessed features...")
 
+    import time
+    cache_save_start = time.time()
     cache_dataframe(final_df_bank, cache_key)
+    cache_save_end = time.time()
+    print(f"[TIMER] features.build_dataset_bank.cache_save: {cache_save_end - cache_save_start:.3f} seconds", flush=True)
 
     return final_df_bank
 

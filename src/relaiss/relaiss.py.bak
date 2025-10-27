@@ -184,7 +184,7 @@ class ReLAISS:
             Whether to force recreation of the index.
         """
         load_ref_start = time.time()
-        print("\n[TIMER] relaiss.load_reference: Starting load_reference", flush=True)
+        print("\n[TIMER] relaiss.load_reference: Starting load_reference")
 
         from . import constants as _c
 
@@ -192,7 +192,7 @@ class ReLAISS:
         sfd_start = time.time()
         download_sfd_files(path_to_sfd_folder)
         sfd_end = time.time()
-        print(f"[TIMER] relaiss.load_reference.download_sfd: {sfd_end - sfd_start:.3f} seconds", flush=True)
+        print(f"[TIMER] relaiss.load_reference.download_sfd: {sfd_end - sfd_start:.3f} seconds")
 
         lc_features = list(lc_features) if lc_features is not None else _c.lc_features_const.copy()
         if include_anomaly_features:
@@ -209,7 +209,7 @@ class ReLAISS:
         read_csv_start = time.time()
         raw_df_bank = pd.read_csv(bank_path, low_memory=False)
         read_csv_end = time.time()
-        print(f"[TIMER] relaiss.load_reference.read_csv: {read_csv_end - read_csv_start:.3f} seconds", flush=True)
+        print(f"[TIMER] relaiss.load_reference.read_csv: {read_csv_end - read_csv_start:.3f} seconds")
 
         # Try to load preprocessed data from cache
         cache_params_bank = {
@@ -227,7 +227,7 @@ class ReLAISS:
         cache_check_start = time.time()
         hydrated_bank = load_cached_dataframe(cache_key_bank)
         cache_check_end = time.time()
-        print(f"[TIMER] relaiss.load_reference.check_cache: {cache_check_end - cache_check_start:.3f} seconds", flush=True)
+        print(f"[TIMER] relaiss.load_reference.check_cache: {cache_check_end - cache_check_start:.3f} seconds")
 
         if hydrated_bank is None:
             print("Preprocessing reference bank...")
@@ -245,7 +245,7 @@ class ReLAISS:
                 building_for_AD=building_for_AD,
             )
             build_bank_end = time.time()
-            print(f"[TIMER] relaiss.load_reference.build_dataset_bank: {build_bank_end - build_bank_start:.3f} seconds", flush=True)
+            print(f"[TIMER] relaiss.load_reference.build_dataset_bank: {build_bank_end - build_bank_start:.3f} seconds")
 
             if 'ZTFID' in hydrated_bank.columns:
                 hydrated_bank = hydrated_bank.rename(columns={'ZTFID': 'ztf_object_id'})
@@ -257,10 +257,10 @@ class ReLAISS:
             cache_save_start = time.time()
             cache_dataframe(hydrated_bank, cache_key_bank)
             cache_save_end = time.time()
-            print(f"[TIMER] relaiss.load_reference.save_cache: {cache_save_end - cache_save_start:.3f} seconds", flush=True)
+            print(f"[TIMER] relaiss.load_reference.save_cache: {cache_save_end - cache_save_start:.3f} seconds")
 
             preprocess_end = time.time()
-            print(f"[TIMER] relaiss.load_reference.total_preprocessing: {preprocess_end - preprocess_start:.3f} seconds", flush=True)
+            print(f"[TIMER] relaiss.load_reference.total_preprocessing: {preprocess_end - preprocess_start:.3f} seconds")
         else:
             print("Loading preprocessed reference bank from cache...")
 
@@ -291,7 +291,7 @@ class ReLAISS:
             )
         )
         index_check_end = time.time()
-        print(f"[TIMER] relaiss.load_reference.check_index_exists: {index_check_end - index_check_start:.3f} seconds", flush=True)
+        print(f"[TIMER] relaiss.load_reference.check_index_exists: {index_check_end - index_check_start:.3f} seconds")
 
         if not index_dirs_exist:
             print("Building search index...")
@@ -309,7 +309,7 @@ class ReLAISS:
                 random_seed=random_seed
             )
             build_index_end = time.time()
-            print(f"[TIMER] relaiss.load_reference.build_indexed_sample: {build_index_end - build_index_start:.3f} seconds", flush=True)
+            print(f"[TIMER] relaiss.load_reference.build_indexed_sample: {build_index_end - build_index_start:.3f} seconds")
 
             # Store the valid_mask for later use
             self._valid_mask = valid_mask
@@ -319,7 +319,7 @@ class ReLAISS:
             scaler = joblib.load(str(index_stem) + "_scaler.joblib")
             feat_arr_scaled = np.load(str(index_stem) + "_feat_arr_scaled.npy")
             load_index_end = time.time()
-            print(f"[TIMER] relaiss.load_reference.load_existing_index: {load_index_end - load_index_start:.3f} seconds", flush=True)
+            print(f"[TIMER] relaiss.load_reference.load_existing_index: {load_index_end - load_index_start:.3f} seconds")
 
         pca = None
         if use_pca:
@@ -366,7 +366,7 @@ class ReLAISS:
 
         load_ref_end = time.time()
         total_time = load_ref_end - load_ref_start
-        print(f"\n[TIMER] relaiss.load_reference: TOTAL LOAD_REFERENCE TIME = {total_time:.3f} seconds\n", flush=True)
+        print(f"\n[TIMER] relaiss.load_reference: TOTAL LOAD_REFERENCE TIME = {total_time:.3f} seconds\n")
 
     def find_neighbors(
         self,
@@ -443,7 +443,7 @@ class ReLAISS:
             If n is None or <= 0, or if no neighbors are found within max_neighbor_dist.
         """
         overall_start = time.time()
-        print(f"\n[TIMER] relaiss.find_neighbors: Starting find_neighbors for {ztf_object_id}", flush=True)
+        print(f"\n[TIMER] relaiss.find_neighbors: Starting find_neighbors for {ztf_object_id}")
 
         ngt_index_dir_stem = self.index_stem
         dataset_bank = Path(path_to_dataset_bank or self.bank_csv)
@@ -463,7 +463,7 @@ class ReLAISS:
             preprocessed_df=self.hydrated_bank,
         )
         primer_end = time.time()
-        print(f"[TIMER] relaiss.find_neighbors.primer: {primer_end - primer_start:.3f} seconds", flush=True)
+        print(f"[TIMER] relaiss.find_neighbors.primer: {primer_end - primer_start:.3f} seconds")
 
         vect = primer_dict['locus_feat_arr']
 
@@ -571,11 +571,11 @@ class ReLAISS:
         dists = dists[:n]
 
         ngt_search_end = time.time()
-        print(f"[TIMER] relaiss.find_neighbors.ngt_search: {ngt_search_end - ngt_search_start:.3f} seconds", flush=True)
+        print(f"[TIMER] relaiss.find_neighbors.ngt_search: {ngt_search_end - ngt_search_start:.3f} seconds")
 
         ann_end_time = time.time()
         ann_elapsed_time = ann_end_time - ngt_search_start
-        print(f"\n[TIMER] relaiss.find_neighbors.ann_elapsed: {ann_elapsed_time:.3f} seconds", flush=True)
+        print(f"\n[TIMER] relaiss.find_neighbors.ann_elapsed: {ann_elapsed_time:.3f} seconds")
 
         # Find optimal number of neighbors
         if suggest_neighbor_num:
@@ -666,42 +666,30 @@ class ReLAISS:
 
         # 4. Get TNS, spec. class of neighbors
         antares_fetch_start = time.time()
-        print(f"\n[TIMER] relaiss.find_neighbors: Fetching ANTARES data for {len(idxs)} neighbors...", flush=True)
+        print(f"\n[TIMER] relaiss.find_neighbors: Fetching ANTARES data for {len(idxs)} neighbors...")
 
-        # Parallel fetch function for a single neighbor
-        def fetch_neighbor_data(idx):
-            ztf_id = self._ids[idx]
-            single_start = time.time()
-            ann_locus = antares_client.search.get_by_ztf_object_id(ztf_object_id=ztf_id)
-            tns_name, tns_cls, tns_z = get_TNS_data(ztf_id)
-            single_end = time.time()
-            print(f"[TIMER] relaiss.find_neighbors.fetch[{ztf_id}]: {single_end - single_start:.3f} seconds", flush=True)
-            return ztf_id, ann_locus, tns_name, tns_cls, tns_z
+        tns_ann_names, tns_ann_classes, tns_ann_zs, neighbor_ztfids = [], [], [], []
+        ann_locus_l = []
+        for i in idxs:
+            neighbor_ztfids.append(self._ids[i])
 
-        # Fetch all neighbors in parallel
-        from concurrent.futures import ThreadPoolExecutor, as_completed
+            single_antares_start = time.time()
+            ann_locus = antares_client.search.get_by_ztf_object_id(ztf_object_id=self._ids[i])
+            ann_locus_l.append(ann_locus)
+            single_antares_end = time.time()
+            print(f"[TIMER] relaiss.find_neighbors.antares_fetch[{self._ids[i]}]: {single_antares_end - single_antares_start:.3f} seconds")
 
-        neighbor_ztfids, ann_locus_l, tns_ann_names, tns_ann_classes, tns_ann_zs = [], [], [], [], []
+            single_tns_start = time.time()
+            tns_ann_name, tns_ann_cls, tns_ann_z = get_TNS_data(self._ids[i])
+            single_tns_end = time.time()
+            print(f"[TIMER] relaiss.find_neighbors.tns_fetch[{self._ids[i]}]: {single_tns_end - single_tns_start:.3f} seconds")
 
-        with ThreadPoolExecutor(max_workers=min(len(idxs), 10)) as executor:
-            future_to_idx = {executor.submit(fetch_neighbor_data, idx): idx for idx in idxs}
-
-            # Collect results in order
-            results = [None] * len(idxs)
-            for future in as_completed(future_to_idx):
-                idx = future_to_idx[future]
-                results[idxs.index(idx)] = future.result()
-
-            # Unpack results maintaining order
-            for ztf_id, ann_locus, tns_name, tns_cls, tns_z in results:
-                neighbor_ztfids.append(ztf_id)
-                ann_locus_l.append(ann_locus)
-                tns_ann_names.append(tns_name)
-                tns_ann_classes.append(tns_cls)
-                tns_ann_zs.append(tns_z)
+            tns_ann_names.append(tns_ann_name)
+            tns_ann_classes.append(tns_ann_cls)
+            tns_ann_zs.append(tns_ann_z)
 
         antares_fetch_end = time.time()
-        print(f"[TIMER] relaiss.find_neighbors.total_antares_tns_fetch: {antares_fetch_end - antares_fetch_start:.3f} seconds", flush=True)
+        print(f"[TIMER] relaiss.find_neighbors.total_antares_tns_fetch: {antares_fetch_end - antares_fetch_start:.3f} seconds")
 
         # Print the nearest neighbors and organize them for storage
         hdr_fmt = "{:<8} {:<13} {:<10} {:<8} {:>7}"       # tag, ZTFID, IAU, class, z
@@ -871,7 +859,7 @@ class ReLAISS:
 
         overall_end = time.time()
         overall_elapsed = overall_end - overall_start
-        print(f"\n[TIMER] relaiss.find_neighbors: TOTAL FUNCTION TIME = {overall_elapsed:.3f} seconds\n", flush=True)
+        print(f"\n[TIMER] relaiss.find_neighbors: TOTAL FUNCTION TIME = {overall_elapsed:.3f} seconds\n")
 
         return pd.DataFrame(storage)
 

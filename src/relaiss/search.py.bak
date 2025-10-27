@@ -47,7 +47,7 @@ def _extract_timeseries(ztf_id, lc_df, features, dataset_bank_path,
     """
     import time
     extract_start = time.time()
-    print(f"[TIMER] search._extract_timeseries: Starting for {ztf_id}", flush=True)
+    print(f"[TIMER] search._extract_timeseries: Starting for {ztf_id}")
 
     ts = get_timeseries_df(
         ztf_id=ztf_id,
@@ -61,7 +61,7 @@ def _extract_timeseries(ztf_id, lc_df, features, dataset_bank_path,
     )
 
     extract_end = time.time()
-    print(f"[TIMER] search._extract_timeseries: {extract_end - extract_start:.3f} seconds", flush=True)
+    print(f"[TIMER] search._extract_timeseries: {extract_end - extract_start:.3f} seconds")
 
     if ts is None or not hasattr(ts, 'dropna'):
         return np.array([]), {'lc_galaxy_ra': np.nan, 'lc_galaxy_dec': np.nan}
@@ -97,7 +97,7 @@ def primer(
     """
     import time
     primer_start = time.time()
-    print(f"[TIMER] search.primer: Starting primer for {lc_ztf_id}", flush=True)
+    print(f"[TIMER] search.primer: Starting primer for {lc_ztf_id}")
 
     # Local helper
     def _get_entity(ztf_id, features):
@@ -133,12 +133,12 @@ def primer(
     bank_load_start = time.time()
     df_bank = _load_dataset_bank(dataset_bank_path, preprocessed_df)
     bank_load_end = time.time()
-    print(f"[TIMER] search.primer.load_bank: {bank_load_end - bank_load_start:.3f} seconds", flush=True)
+    print(f"[TIMER] search.primer.load_bank: {bank_load_end - bank_load_start:.3f} seconds")
 
     entity_start = time.time()
     lc_arr, lc_coords, lc_tns, lc_id = _get_entity(lc_ztf_id, lc_features)
     entity_end = time.time()
-    print(f"[TIMER] search.primer.get_lc_entity: {entity_end - entity_start:.3f} seconds", flush=True)
+    print(f"[TIMER] search.primer.get_lc_entity: {entity_end - entity_start:.3f} seconds")
 
     if host_ztf_id:
         host_arr, host_coords, host_tns, host_id = _get_entity(host_ztf_id, host_features)
@@ -184,6 +184,6 @@ def primer(
         output['locus_feat_arrs_mc_l'].append(s.values)
 
     primer_end = time.time()
-    print(f"[TIMER] search.primer: TOTAL TIME = {primer_end - primer_start:.3f} seconds", flush=True)
+    print(f"[TIMER] search.primer: TOTAL TIME = {primer_end - primer_start:.3f} seconds")
 
     return output

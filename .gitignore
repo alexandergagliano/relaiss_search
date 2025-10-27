@@ -1,9 +1,57 @@
-data/sfddata-master/
-data/df_bank.csv
-data/theorized_lc/
-code/__pycache__/
-data/.DS_Store
-src/relaiss/_version.py
-src/relaiss/__pycache__/
-src/relaiss/reference/
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# macOS
 .DS_Store
+
+# Local test scripts (keep these out of deployment)
+test_*.py
+*_test.py
+
+# Cache (these will be regenerated on HF)
+.cache_relaiss/
+*.ngt
+
+# Logs
+*.log

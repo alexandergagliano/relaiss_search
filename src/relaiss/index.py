@@ -103,6 +103,25 @@ def build_indexed_sample(
             f"No host features provided. Running lightcurve-only LAISS with {num_lc_features} features."
         )
 
+    # Create valid mask from original data before filtering
+    search_features = lc_features + host_features
+    search_data = data_bank[search_features]
+    
+    # Check for NaN values in the features we're using for similarity search
+    print(f"Original data shape: {data_bank.shape}")
+    nan_mask = search_data.isna().any(axis=1)
+    nan_count = nan_mask.sum()
+    if nan_count > 0:
+        print(f"Found {nan_count} rows with NaN values in search features ({nan_count/len(data_bank)*100:.1f}%).")
+        print("WARNING: Data should be pre-imputed. Dropping rows with NaN values as fallback.")
+        # Keep track of which rows we're keeping
+        valid_mask = ~nan_mask
+        data_bank = data_bank[valid_mask]
+        print(f"After cleaning: {data_bank.shape[0]} rows remaining")
+    else:
+        print("No NaN values found in search features.")
+        valid_mask = np.ones(len(data_bank), dtype=bool)
+
     # Filtering dataset bank for provided features
     data_bank = data_bank[lc_features + host_features]
 
@@ -187,5 +206,6 @@ def build_indexed_sample(
     return (
         index_stem_name_with_path,
         scaler,
-        feat_arr_scaled_pca if use_pca else feat_arr_scaled
+        feat_arr_scaled_pca if use_pca else feat_arr_scaled,
+        valid_mask  # Return the valid mask for cleaning the hydrated_bank
     )

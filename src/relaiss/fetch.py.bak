@@ -184,7 +184,7 @@ def get_timeseries_df(
     """
     import time
     ts_start = time.time()
-    print(f"[TIMER] fetch.get_timeseries_df: Starting for {ztf_id}", flush=True)
+    print(f"[TIMER] fetch.get_timeseries_df: Starting for {ztf_id}")
 
     # When preprocessed_df is provided, skip cache and file checks
     # and always use extract_lc_and_host_features to ensure consistency
@@ -205,8 +205,8 @@ def get_timeseries_df(
             preprocessed_df=preprocessed_df,
         )
         extract_end = time.time()
-        print(f"[TIMER] fetch.get_timeseries_df.extract_features: {extract_end - extract_start:.3f} seconds", flush=True)
-        print(f"[TIMER] fetch.get_timeseries_df: TOTAL = {extract_end - ts_start:.3f} seconds", flush=True)
+        print(f"[TIMER] fetch.get_timeseries_df.extract_features: {extract_end - extract_start:.3f} seconds")
+        print(f"[TIMER] fetch.get_timeseries_df: TOTAL = {extract_end - ts_start:.3f} seconds")
         return result
 
     # Generate cache key based on input parameters
@@ -229,8 +229,8 @@ def get_timeseries_df(
     cache_end = time.time()
     if cached_df is not None:
         if not building_for_AD:
-            print(f"[TIMER] fetch.get_timeseries_df.load_from_cache: {cache_end - cache_start:.3f} seconds", flush=True)
-            print(f"[TIMER] fetch.get_timeseries_df: TOTAL = {cache_end - ts_start:.3f} seconds", flush=True)
+            print(f"[TIMER] fetch.get_timeseries_df.load_from_cache: {cache_end - cache_start:.3f} seconds")
+            print(f"[TIMER] fetch.get_timeseries_df: TOTAL = {cache_end - ts_start:.3f} seconds")
         return cached_df
 
     if theorized_lightcurve_df is not None:
